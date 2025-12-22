@@ -15,6 +15,9 @@ class AddRequestContext
 
         Log::withContext([
             'url' => $request->fullUrl(),
+            'user_id' => $request->user()->id ?? null,
+            'user_email' => $request->user()->email ?? null,
+            'user_name' => $request->user()->name ?? null,
             'method' => $request->method(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),

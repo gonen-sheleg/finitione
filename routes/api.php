@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Middleware\AddRequestContext;
 use Illuminate\Support\Facades\Route;
@@ -15,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(AddRequestContext::class)->group(function () {
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::middleware(['auth:sanctum', AddRequestContext::class])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/order', [OrderController::class, 'create']);
 });
