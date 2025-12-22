@@ -11,7 +11,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
-            $table->decimal('subtotal', 12, 2)->default(0);
+            $table->decimal('sub_total_price', 12)->unsigned()->index();
+            $table->decimal('sub_total_final_price', 12)->unsigned()->index();
+            $table->unsignedInteger('sub_total_quantity')->index();
             $table->string('status')->default('pending');
             $table->timestamps();
         });

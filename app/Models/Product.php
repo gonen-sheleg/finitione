@@ -7,11 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
+        'sku',
         'name',
-        'category_id',
+        'description',
     ];
 
     public function vendors()
@@ -22,5 +21,10 @@ class Product extends Model
     public function productVendors()
     {
         return $this->hasMany(ProductVendor::class);
+    }
+
+    public function scopeBySku($query, $sku)
+    {
+        return $query->where('sku', $sku);
     }
 }

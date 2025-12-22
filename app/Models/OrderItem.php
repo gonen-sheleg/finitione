@@ -7,15 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderItem extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'sub_order_id',
         'product_id',
         'vendor_id',
         'quantity',
         'unit_price',
-        'final_price',
+        'unit_final_price',
     ];
 
     public function subOrder()

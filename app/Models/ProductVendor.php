@@ -7,12 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductVendor extends Model
 {
-    use HasFactory;
 
     protected $fillable = [
         'product_id',
         'vendor_id',
         'price',
+        'quantity'
     ];
 
     public function product()

@@ -7,12 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    use HasFactory;
 
     protected $fillable = [
-        'customer_id',
-        'total_amount',
+        'total_price',
+        'total_final_price',
+        'total_quantity',
+        'cart',
         'status',
+    ];
+
+    protected $casts = [
+        'cart' => 'array',
     ];
 
     public function subOrders()

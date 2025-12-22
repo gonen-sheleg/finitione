@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\OrderController;
+use App\Http\Middleware\AddRequestContext;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,4 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('/order', [OrderController::class, 'create']);
+Route::middleware(AddRequestContext::class)->group(function () {
+    Route::post('/order', [OrderController::class, 'create']);
+});
