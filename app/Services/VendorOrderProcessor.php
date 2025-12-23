@@ -27,7 +27,7 @@ class VendorOrderProcessor
             'order_id' => $order->id,
             'vendor_id' => $vendorId,
             'sub_total_price' => $itemsCollection->pluck('productVendor')->sum('price'),
-            'sub_total_final_price' => $itemsCollection->pluck('discounts')->sum('final_price'),
+            'sub_total_final_price' => $itemsCollection->pluck('discount')->sum('price'),
             'sub_total_quantity' => $itemsCollection->sum('quantity'),
         ]);
 

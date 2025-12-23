@@ -46,16 +46,15 @@ class DiscountEngine
         foreach ($rules as $index => $rule) {
             try {
                 $discountName = Str::lower(Str::before(class_basename($rule), 'DiscountRule'));
-                logInfo("Checking discount rule for $discountName", 'green');
+                logInfo("Discount name: $discountName", 'green');
                 if ($rule->isApplicable($productVendor, $quantity)) {
-                    logInfo("Discount rule applied to $discountName", 'green');
                     $discountDetails[] = [
                         'name' => $discountName,
                         'discount' => $rule->apply($productVendor, $quantity),
                     ];
                     $value = $rule->apply($productVendor, $quantity);
                     $discount += $value;
-                    logInfo("Discount applied to $discountName: $value", 'green');
+                    logInfo("Discount value: $value", 'green');
                 } else {
                     logInfo("Not applicable for $discountName", 'red');
                 }

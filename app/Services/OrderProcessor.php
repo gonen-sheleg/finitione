@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Facades\PriceEngine;
 use App\Facades\VendorOrderProcessor;
 use App\Models\Order;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,15 +31,17 @@ class OrderProcessor
 
             $pvc = collect($productVendors);
 
+            $userId = auth()->user()->id;
             // Create the order with pending status.
             $order = Order::create([
-                'user_id' => auth()->user()->id,
+                'user_id' => $userId,
                 'total_price' => $pvc->pluck('productVendor')->sum('price'),
                 'total_final_price' => $pvc->pluck('discount')->sum('price'),
                 'total_quantity' => $pvc->sum('quantity'),
                 'cart' => $cart,
             ]);
 
+            Cache::forget("loyalty-customer-discount-count-orders-$userId");
             logInfo("Order created: {$order->id}", 'magenta', $order->toArray());
 
             // Group the items by vendor.

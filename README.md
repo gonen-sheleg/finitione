@@ -1,59 +1,330 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Finitione Order Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A multi-vendor e-commerce order processing system built with Laravel 12, featuring intelligent price comparison, extensible discount rules, parallel processing, and automated vendor notifications.
 
-## About Laravel
+**Time Investment:** 10 hours
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- 🛒 Multi-vendor order processing with automatic best price selection
+- 💰 Extensible discount engine with pluggable rules
+- 📦 Quantity-based discounts (5%-15% based on order size)
+- 👤 Loyalty customer discounts (5%-15% based on order history)
+- 🏷️ Category-based discounts (5%-11% for specific categories)
+- ⚡ Parallel processing using Laravel Concurrency for fast order handling
+- 📋 Sub-order creation per vendor for easy fulfillment
+- 📧 Automated vendor notifications via queued jobs
+- 🔐 Sanctum-based API authentication
+- 🧪 Comprehensive test suite with Pest
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## What's Included
 
-## Learning Laravel
+This repository contains order management system with:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- ✅ **Full source code** with organized service layer architecture
+- ✅ **RESTful API endpoints** for authentication and order operations
+- ✅ **Price Engine** that finds the best vendor price for each product
+- ✅ **Discount Engine** with auto-discovery of discount rules
+- ✅ **Vendor Order Processor** that groups items by vendor
+- ✅ **Background job processing** for vendor notifications
+- ✅ **Docker configuration** via Laravel Sail for easy local setup
+- ✅ **MySQL and Redis** integration for data persistence and caching
+- ✅ **Pest test suite** with discount and vendor grouping tests
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Requirements
 
-## Laravel Sponsors
+- **Docker Desktop** (includes Docker Compose)
+  - [Download for Mac](https://docs.docker.com/desktop/install/mac-install/)
+  - [Download for Windows](https://docs.docker.com/desktop/install/windows-install/)
+  - [Download for Linux](https://docs.docker.com/desktop/install/linux-install/)
+- **Git**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+> **Note**: No need to install PHP, Composer, MySQL, or Redis locally. Everything runs inside Docker containers via Laravel Sail.
 
-### Premium Partners
+## Installation & Running
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Quick Start
 
-## Contributing
+```bash
+git clone https://github.com/gonen-sheleg/finitione.git
+cd finitione
+cp .env.example .env
+docker run --rm -v $(pwd):/app composer install --ignore-platform-reqs
+./vendor/bin/sail up -d
+./vendor/bin/sail artisan key:generate
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan db:seed
+./vendor/bin/sail npm install
+./vendor/bin/sail npm run build
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Detailed Installation Guide
 
-## Code of Conduct
+### Step 1: Clone and Setup Environment
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+git clone https://github.com/gonen-sheleg/finitione.git
+cd finitione
+cp .env.example .env
+```
 
-## Security Vulnerabilities
+### Step 2: Install Composer Dependencies
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Since Sail isn't available yet, use Docker to install Composer dependencies first:
+
+```bash
+docker run --rm -v $(pwd):/app composer install --ignore-platform-reqs
+```
+
+### Step 3: Start Docker Containers
+
+```bash
+./vendor/bin/sail up -d
+```
+
+This starts MySQL, Redis, and the Laravel app containers. First-time setup may take 5-10 minutes to download Docker images.
+
+**Optional**: Create a shell alias for convenience:
+
+```bash
+alias sail='./vendor/bin/sail'
+```
+
+### Step 4: Configure Application
+
+```bash
+sail artisan key:generate
+sail artisan migrate
+sail artisan db:seed
+```
+
+
+### Step 6: Run Development Server
+
+For the best development experience with logs, queue worker, and Vite:
+
+```bash
+sail composer dev
+```
+
+This runs concurrently:
+- Laravel development server
+- Queue worker for background jobs
+- Pail for real-time log viewing
+- Vite for frontend assets
+
+## Running Tests
+
+```bash
+sail artisan test
+```
+
+Or use the composer script:
+
+```bash
+sail composer test
+```
+
+## API Usage Examples
+
+The API provides RESTful endpoints for authentication and order operations.
+
+### Authentication
+
+#### Login
+
+```bash
+curl -X POST http://localhost/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "password"}'
+
+# Response:
+# {
+#   "user": { "id": 1, "name": "John Doe", "email": "user@example.com" },
+#   "token": "1|abc123..."
+# }
+```
+
+#### Logout
+
+```bash
+curl -X POST http://localhost/api/logout \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Response:
+# { "message": "Successfully logged out." }
+```
+
+### Create Order
+
+```bash
+curl -X POST http://localhost/api/order \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "cart": [
+      {"sku": "PROD-001", "quantity": 15},
+      {"sku": "PROD-002", "quantity": 5}
+    ]
+  }'
+
+# Response:
+# [
+#   {
+#     "sku": "PROD-001",
+#     "quantity": 15,
+#     "price": 100.00,
+#     "price_after_discount": 95.00
+#   },
+#   {
+#     "sku": "PROD-002",
+#     "quantity": 5,
+#     "price": 120.00,
+#     "price_after_discount": 120.00
+#   }
+# ]
+```
+
+**Validation**: 
+- Cart must have at least one item
+- SKU must exist in the products table
+- Quantity must be at least 1
+
+## Discount Rules
+
+### Quantity Discounts
+
+| Quantity | Discount |
+|----------|----------|
+| 10-19    | 5%       |
+| 20-29    | 7%       |
+| 30-39    | 9%       |
+| 40-49    | 11%      |
+| 50+      | 15%      |
+
+### Loyalty Customer Discounts
+
+Based on orders in the last 6 months:
+
+| Orders | Discount |
+|--------|----------|
+| 6-9    | 5%       |
+| 10-19  | 10%      |
+| 20-29  | 12%      |
+| 30+    | 15%      |
+
+### Category Discounts
+
+| Category ID | Discount |
+|-------------|----------|
+| 2           | 5%       |
+| 5           | 7%       |
+| 7           | 9%       |
+| 9           | 11%      |
+
+**Note**: All applicable discounts are combined additively. For example, a loyal customer (10% discount) ordering 15 items (5% discount) of a category 2 product (5% discount) receives a total 20% discount.
+
+## How It Works
+
+### Order Flow
+
+1. **User submits cart** with product SKUs and quantities
+2. **Validation** ensures all products exist and quantities are valid
+3. **Price Engine** finds the cheapest vendor for each product (parallel)
+4. **Discount Engine** applies all applicable discount rules
+5. **Order created** with total prices before and after discounts
+6. **Items grouped by vendor** using VendorOrderProcessor
+7. **Sub-orders created** for each vendor (parallel)
+8. **Vendor notifications** dispatched as background jobs
+9. **Response returned** with detailed pricing information
+
+### Adding New Discount Rules
+
+1. Create a new class in `app/Services/Discount/Rules/`
+2. Implement `DiscountRuleInterface`
+3. Define `isApplicable()` to check if rule applies
+4. Define `apply()` to return discount percentage (0.0 to 1.0)
+
+Example:
+
+```php
+class HolidayDiscountRule implements DiscountRuleInterface
+{
+    public function apply(ProductVendor $productVendor, int $quantity): float
+    {
+        return 0.10; // 10% holiday discount
+    }
+
+    public function isApplicable(ProductVendor $productVendor, int $quantity): bool
+    {
+        return now()->month === 12; // Only in December
+    }
+}
+```
+
+The rule will be automatically discovered and applied!
+
+## Project Structure
+
+```
+finitione/
+├── app/
+│   ├── Exceptions/
+│   │   └── InsufficientStockException.php   # Stock validation exception
+│   ├── Facades/
+│   │   ├── DiscountEngine.php               # Discount facade
+│   │   ├── OrderProcessor.php               # Order processing facade
+│   │   ├── PriceEngine.php                  # Price comparison facade
+│   │   └── VendorOrderProcessor.php         # Vendor grouping facade
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── AuthController.php           # Login/Logout endpoints
+│   │   │   └── OrderController.php          # Order creation endpoint
+│   │   └── Middleware/
+│   │       └── AddRequestContext.php        # Request context middleware
+│   ├── Jobs/
+│   │   └── NotifyVendorJob.php              # Vendor notification job
+│   ├── Models/
+│   │   ├── Order.php                        # Main order model
+│   │   ├── OrderItem.php                    # Order line items
+│   │   ├── Product.php                      # Product catalog
+│   │   ├── ProductVendor.php                # Vendor-product pricing
+│   │   ├── SubOrder.php                     # Per-vendor sub-orders
+│   │   ├── User.php                         # Customer model
+│   │   └── Vendor.php                       # Vendor model
+│   └── Services/
+│       ├── Discount/
+│       │   ├── DiscountEngine.php           # Rule orchestration
+│       │   ├── DiscountRuleInterface.php    # Rule contract
+│       │   └── Rules/
+│       │       ├── CategoryDiscountRule.php
+│       │       ├── LoyaltyCustomerDiscountRule.php
+│       │       └── QuantityDiscountRule.php
+│       ├── OrderProcessor.php               # Cart processing logic
+│       ├── PriceEngine.php                  # Best price finder
+│       └── VendorOrderProcessor.php         # Vendor grouping logic
+├── database/
+│   └── migrations/                          # Database schema
+├── routes/
+│   └── api.php                              # API route definitions
+├── tests/
+│   └── Unit/
+│       ├── DiscountTest.php                 # Discount rule tests
+│       └── VendorGroupingTest.php           # Vendor grouping tests
+└── compose.yaml                             # Docker configuration
+```
+
+## Tech Stack
+
+- **Framework**: Laravel 12 (PHP 8.2+)
+- **Database**: MySQL 8.4
+- **Cache/Queue**: Redis
+- **Authentication**: Laravel Sanctum
+- **Parallel Processing**: Laravel Concurrency (spatie/fork)
+- **Testing**: Pest PHP
+- **Build Tool**: Vite
+- **Container**: Docker (Laravel Sail)
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT License - feel free to use for learning and interviews.

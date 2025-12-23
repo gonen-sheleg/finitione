@@ -22,6 +22,7 @@ class QuantityDiscountRule implements DiscountRuleInterface
 
     public function isApplicable(ProductVendor $productVendor, int $quantity): bool
     {
+        logInfo("Quantity: {$quantity}", 'blue');
         return $quantity >= 10;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services\Discount\Rules;
 use App\Models\OrderItem;
 use App\Models\ProductVendor;
 use App\Services\Discount\DiscountRuleInterface;
+use Illuminate\Support\Facades\Cache;
 
 class LoyaltyCustomerDiscountRule implements DiscountRuleInterface
 {
@@ -25,10 +26,13 @@ class LoyaltyCustomerDiscountRule implements DiscountRuleInterface
     {
         $user = auth()->user();
 
-        $this->userOrders = $user
+        $this->userOrders = Cache::remember("loyalty-customer-discount-count-orders-{$user->id}",60*60,fn() => $user
             ->orders()
             ->where('created_at', '>=', now()->subMonths(6))
-            ->count();
+            ->count()
+        );
+
+        logInfo("User orders: {$this->userOrders}", 'blue');
 
         return $this->userOrders > 5;
     }

@@ -21,6 +21,7 @@ class CategoryDiscountRule implements DiscountRuleInterface
 
     public function isApplicable(ProductVendor $productVendor, int $quantity): bool
     {
+        logInfo("Category: {$productVendor->product->category_id}", 'blue');
         return in_array($productVendor->product->category_id, [2, 5, 7, 9]);
     }
 }
