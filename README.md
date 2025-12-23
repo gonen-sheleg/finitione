@@ -2,8 +2,6 @@
 
 A multi-vendor e-commerce order processing system built with Laravel 12, featuring intelligent price comparison, extensible discount rules, parallel processing, and automated vendor notifications.
 
-**Time Investment:** 10 hours
-
 ## Features
 
 - 🛒 Multi-vendor order processing with automatic best price selection
