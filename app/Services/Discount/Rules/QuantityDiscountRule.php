@@ -22,6 +22,6 @@ class QuantityDiscountRule implements DiscountRuleInterface
 
     public function isApplicable(ProductVendor $productVendor, int $quantity): bool
     {
-        return $quantity > 10;
+        return $quantity >= 10;
     }
 }

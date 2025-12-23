@@ -40,7 +40,10 @@ class DiscountEngine
         $discount = 0;
         $discountDetails = [];
 
-        foreach ($rules as $rule) {
+
+        logInfo("Discount processing started for product {$productVendor->product->sku}", 'magenta');
+
+        foreach ($rules as $index => $rule) {
             try {
                 $discountName = Str::lower(Str::before(class_basename($rule), 'DiscountRule'));
                 logInfo("Checking discount rule for $discountName", 'green');
@@ -50,15 +53,25 @@ class DiscountEngine
                         'name' => $discountName,
                         'discount' => $rule->apply($productVendor, $quantity),
                     ];
-                    $discount += $rule->apply($productVendor, $quantity);
-                    logInfo("Discount applied to $discountName: $discount", 'green');
+                    $value = $rule->apply($productVendor, $quantity);
+                    $discount += $value;
+                    logInfo("Discount applied to $discountName: $value", 'green');
                 } else {
                     logInfo("Not applicable for $discountName", 'red');
+                }
+
+
+                // Print separator sign between rules
+                if($index + 1 != count($rules)){
+                    logInfo(str_repeat('-',50));
                 }
             } catch (\Exception $e) {
                 Log::error($e);
             }
         }
+
+        // Print separator sign after all rules separated products
+        logInfo(str_repeat('-',50));
 
         return [
             'details' => $discountDetails,
