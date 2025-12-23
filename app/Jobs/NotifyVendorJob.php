@@ -14,9 +14,7 @@ class NotifyVendorJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(
-        public SubOrder $subOrder
-    ) {}
+    public function __construct(public SubOrder $subOrder) {}
 
     /**
      * Execute the job.
@@ -41,7 +39,9 @@ class NotifyVendorJob implements ShouldQueue
             $address['state'] ?? null,
             $address['postal_code'] ?? null,
             $address['country'] ?? null,
-        ])->filter()->join(', ');
+        ])
+            ->filter()
+            ->join(', ');
 
         // Build the items table for the notification message.
         $itemsDetails = $this->buildItemsTable($subOrder);
@@ -84,10 +84,9 @@ class NotifyVendorJob implements ShouldQueue
             ========================================
         EOT;
 
-
         // Log (send) the notification message.
-        logInfo("Vendor notification sending to {$vendor->email}", "purple");
-        logInfo("\n\n{$message}", "yellow");
+        logInfo("Vendor notification sending to {$vendor->email}", 'purple');
+        logInfo("\n\n{$message}", 'yellow');
     }
 
     /**
@@ -106,9 +105,11 @@ class NotifyVendorJob implements ShouldQueue
     private function buildItemsTable(SubOrder $subOrder): string
     {
         // Format the items data for display in the table.
-        $itemsData = $subOrder->items->map(function($item) {
+        $itemsData = $subOrder->items->map(function ($item) {
             // Format the discount details for display.
-            $discountDetails = collect($item->discounts)->map(fn($d) => "{$d['name']}: " . ($d['discount'] * 100) . "%")->join(' | ');
+            $discountDetails = collect($item->discounts)
+                ->map(fn($d) => "{$d['name']}: " . $d['discount'] * 100 . '%')
+                ->join(' | ');
             return [
                 'name' => substr($item->product->name, 0, 30),
                 'sku' => substr($item->product->sku, 0, 20),
@@ -122,21 +123,29 @@ class NotifyVendorJob implements ShouldQueue
         // Calculate the maximum width for the discount details column.
         // This ensures the table column is wide enough to fit the longest discount text.
         $discountColWidth = max(16, $itemsData->max(fn($item) => strlen($item['discount_details'])));
-        $itemsHeader = sprintf("| Product                        | SKU                  | Qty | Unit Price | After Discounted | %-{$discountColWidth}s |", "Discount Details");
-        $itemsSeparator = "+--------------------------------+----------------------+-----+------------+------------------+" . str_repeat('-', $discountColWidth + 2) . "+";
+        $itemsHeader = sprintf(
+            "| Product                        | SKU                  | Qty | Unit Price | After Discounted | %-{$discountColWidth}s |",
+            'Discount Details',
+        );
+        $itemsSeparator =
+            '+--------------------------------+----------------------+-----+------------+------------------+' .
+            str_repeat('-', $discountColWidth + 2) .
+            '+';
 
         // Format each item as a row in the table.
-        $itemsRows = $itemsData->map(function($item) use ($discountColWidth) {
-            return sprintf(
-                "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-{$discountColWidth}s |",
-                $item['name'],
-                $item['sku'],
-                $item['quantity'],
-                $item['unit_price'],
-                $item['unit_final_price'],
-                $item['discount_details']
-            );
-        })->join("\n");
+        $itemsRows = $itemsData
+            ->map(function ($item) use ($discountColWidth) {
+                return sprintf(
+                    "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-{$discountColWidth}s |",
+                    $item['name'],
+                    $item['sku'],
+                    $item['quantity'],
+                    $item['unit_price'],
+                    $item['unit_final_price'],
+                    $item['discount_details'],
+                );
+            })
+            ->join("\n");
 
         return "\n{$itemsSeparator}\n{$itemsHeader}\n{$itemsSeparator}\n{$itemsRows}\n{$itemsSeparator}";
     }

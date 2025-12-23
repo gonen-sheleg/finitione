@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Concurrency;
 
 class VendorOrderProcessor
 {
-
     /**
      * Process the order items for a specific vendor.
      *
@@ -23,7 +22,6 @@ class VendorOrderProcessor
      */
     public function process(Order $order, int $vendorId, Collection $itemsCollection): SubOrder
     {
-
         // Create a sub-order for the vendor.
         $subOrder = SubOrder::create([
             'order_id' => $order->id,
@@ -35,17 +33,19 @@ class VendorOrderProcessor
 
         // Create order items in parallel for faster processing.
         Concurrency::run(
-            $itemsCollection->map(fn($item) =>
-                fn() => OrderItem::create([
-                    "sub_order_id" => $subOrder->id,
-                    "product_id" => $item['productVendor']['product_id'],
-                    "vendor_id" => $item['productVendor']['vendor_id'],
-                    "quantity" => $item['quantity'],
-                    "unit_price" => $item['productVendor']['price'],
-                    "unit_final_price" => $item['discount']['price'],
-                    "discounts" => $item['discount']['details'],
-                ])
-            )->toArray()
+            $itemsCollection
+                ->map(
+                    fn($item) => fn() => OrderItem::create([
+                        'sub_order_id' => $subOrder->id,
+                        'product_id' => $item['productVendor']['product_id'],
+                        'vendor_id' => $item['productVendor']['vendor_id'],
+                        'quantity' => $item['quantity'],
+                        'unit_price' => $item['productVendor']['price'],
+                        'unit_final_price' => $item['discount']['price'],
+                        'discounts' => $item['discount']['details'],
+                    ]),
+                )
+                ->toArray(),
         );
 
         logInfo("Suborder created: {$subOrder->id}", 'orange', $subOrder->toArray());
@@ -54,6 +54,5 @@ class VendorOrderProcessor
         NotifyVendorJob::dispatch($subOrder);
 
         return $subOrder;
-
     }
 }

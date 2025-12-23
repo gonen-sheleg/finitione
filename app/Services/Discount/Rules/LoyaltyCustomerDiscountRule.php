@@ -8,7 +8,6 @@ use App\Services\Discount\DiscountRuleInterface;
 
 class LoyaltyCustomerDiscountRule implements DiscountRuleInterface
 {
-
     private $userOrders = 0;
 
     public function apply(ProductVendor $productVendor, int $quantity): float
@@ -26,7 +25,10 @@ class LoyaltyCustomerDiscountRule implements DiscountRuleInterface
     {
         $user = auth()->user();
 
-        $this->userOrders = $user->orders()->where('created_at', '>=', now()->subMonths(6))->count();
+        $this->userOrders = $user
+            ->orders()
+            ->where('created_at', '>=', now()->subMonths(6))
+            ->count();
 
         return $this->userOrders > 5;
     }

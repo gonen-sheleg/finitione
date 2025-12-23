@@ -34,9 +34,11 @@ class ProductVendorFactory extends Factory
      */
     public function forProduct(Product $product): static
     {
-        return $this->state(fn (array $attributes) => [
-            'product_id' => $product->id,
-        ]);
+        return $this->state(
+            fn(array $attributes) => [
+                'product_id' => $product->id,
+            ],
+        );
     }
 
     /**
@@ -44,9 +46,11 @@ class ProductVendorFactory extends Factory
      */
     public function withBasePrice(float $basePrice): static
     {
-        return $this->state(fn (array $attributes) => [
-            'price' => round($basePrice * (1 + rand(-10, 10) / 100), 2),
-        ]);
+        return $this->state(
+            fn(array $attributes) => [
+                'price' => round($basePrice * (1 + rand(-10, 10) / 100), 2),
+            ],
+        );
     }
 
     /**
@@ -54,8 +58,10 @@ class ProductVendorFactory extends Factory
      */
     public function forVendor(Vendor $vendor): static
     {
-        return $this->state(fn (array $attributes) => [
-            'vendor_id' => $vendor->id,
-        ]);
+        return $this->state(
+            fn(array $attributes) => [
+                'vendor_id' => $vendor->id,
+            ],
+        );
     }
 }

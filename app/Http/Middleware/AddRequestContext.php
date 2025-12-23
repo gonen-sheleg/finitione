@@ -12,7 +12,6 @@ class AddRequestContext
 {
     public function handle(Request $request, Closure $next): Response
     {
-
         $context = [
             'url' => $request->fullUrl(),
             'user_id' => $request->user()->id ?? null,
@@ -24,12 +23,9 @@ class AddRequestContext
             'payload' => $request->all(),
         ];
 
-        logInfo("Request context: ",'cyan',$context );
+        logInfo('Request context: ', 'cyan', $context);
 
         Log::withContext($context);
-
-
-
 
         return $next($request);
     }

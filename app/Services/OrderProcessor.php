@@ -11,9 +11,8 @@ use Illuminate\Support\Facades\Log;
 
 class OrderProcessor
 {
-
     // Process the cart and create an order.
-    public function processCart($cart) : array
+    public function processCart($cart): array
     {
         try {
             // Start a database transaction to ensure data integrity.
@@ -26,9 +25,7 @@ class OrderProcessor
             // Each item is sent to PriceEngine to find the vendor with the lowest price.
             // Any available discounts are also applied at this stage.
             $productVendors = Concurrency::run(
-                $cart->map(fn ($item) =>
-                fn() => PriceEngine::findBestPrice($item['sku'], $item['quantity'])
-                )->toArray()
+                $cart->map(fn($item) => fn() => PriceEngine::findBestPrice($item['sku'], $item['quantity']))->toArray(),
             );
 
             $pvc = collect($productVendors);
@@ -39,7 +36,7 @@ class OrderProcessor
                 'total_price' => $pvc->pluck('productVendor')->sum('price'),
                 'total_final_price' => $pvc->pluck('discount')->sum('price'),
                 'total_quantity' => $pvc->sum('quantity'),
-                'cart' => $cart
+                'cart' => $cart,
             ]);
 
             logInfo("Order created: {$order->id}", 'magenta', $order->toArray());
@@ -51,16 +48,21 @@ class OrderProcessor
             // Each vendor receives a list of items that belong only to them.
             // Uses Concurrency::run to create all sub-orders in parallel for faster processing.
             $subOrders = Concurrency::run(
-                $vendors->map(fn($vendorItems, $vendorId) =>
-                    fn() => VendorOrderProcessor::process($order, $vendorId, $vendorItems)
-                )->toArray()
+                $vendors
+                    ->map(
+                        fn($vendorItems, $vendorId) => fn() => VendorOrderProcessor::process(
+                            $order,
+                            $vendorId,
+                            $vendorItems,
+                        ),
+                    )
+                    ->toArray(),
             );
 
             DB::commit();
 
             return $subOrders;
-        }catch (\Exception $e){
-
+        } catch (\Exception $e) {
             // Roll back the transaction if an error occurs.
             DB::rollBack();
             // Log the error.

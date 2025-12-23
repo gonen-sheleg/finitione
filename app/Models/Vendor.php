@@ -11,10 +11,7 @@ class Vendor extends Model
 
     public $timestamps = true;
 
-    protected $fillable = [
-        'name',
-        'email',
-    ];
+    protected $fillable = ['name', 'email'];
 
     public function products()
     {

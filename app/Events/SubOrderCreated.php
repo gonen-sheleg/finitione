@@ -14,7 +14,5 @@ class SubOrderCreated
     /**
      * Create a new event instance.
      */
-    public function __construct(
-        public SubOrder $subOrder
-    ) {}
+    public function __construct(public SubOrder $subOrder) {}
 }

@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
-
     /**
      * Create a new order from the customer's cart.
      *
@@ -28,22 +27,25 @@ class OrderController extends Controller
      */
     public function create(Request $request)
     {
-
         // Validate the incoming cart request.
         // The cart must have at least one item.
         // Each item must have a valid product SKU that exists in the database.
         // Each item must have a quantity of at least 1.
-        $validator = Validator::make($request->all(), [
-            'cart' => 'required|array|min:1',
-            'cart.*.sku' => 'required|string|exists:products,sku',
-            'cart.*.quantity' => 'required|integer|min:1',
-        ], [
-            'cart.*.sku.exists' => "The selected product is currently unavailable or doesn't exist.",
-            'cart.*.sku.required' => 'Please select a product for this item.',
-            'cart.*.quantity.required' => 'Please enter the amount you wish to order.',
-            'cart.*.quantity.integer' => 'The quantity must be a whole number.',
-            'cart.*.quantity.min' => 'The minimum order quantity is :min.',
-        ]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'cart' => 'required|array|min:1',
+                'cart.*.sku' => 'required|string|exists:products,sku',
+                'cart.*.quantity' => 'required|integer|min:1',
+            ],
+            [
+                'cart.*.sku.exists' => "The selected product is currently unavailable or doesn't exist.",
+                'cart.*.sku.required' => 'Please select a product for this item.',
+                'cart.*.quantity.required' => 'Please enter the amount you wish to order.',
+                'cart.*.quantity.integer' => 'The quantity must be a whole number.',
+                'cart.*.quantity.min' => 'The minimum order quantity is :min.',
+            ],
+        );
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
@@ -51,7 +53,7 @@ class OrderController extends Controller
 
         $validated = $validator->validated();
 
-        try{
+        try {
             $cart = collect($validated['cart']);
 
             $subOrders = OrderProcessor::processCart($cart);
@@ -59,25 +61,21 @@ class OrderController extends Controller
             // Build the response by going through all sub-orders.
             // For each item, return the product SKU, ordered quantity,
             // original price, and the final price after any discounts applied.
-            $response = collect($subOrders)->flatMap(fn($suborder) =>
-                $suborder->items()->with('product')->get()->map(fn($item) => [
-                    'sku' => $item->product->sku,
-                    'quantity' => $item->quantity,
-                    'price' => $item->unit_price,
-                    'price_after_discount' => $item->unit_final_price,
-                ])
+            $response = collect($subOrders)->flatMap(
+                fn($suborder) => $suborder->items()->with('product')->get()->map(
+                    fn($item) => [
+                        'sku' => $item->product->sku,
+                        'quantity' => $item->quantity,
+                        'price' => $item->unit_price,
+                        'price_after_discount' => $item->unit_final_price,
+                    ],
+                ),
             );
 
             return response()->json($response);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             Log::error($e);
             return response()->json(['error' => 'Something went wrong'], 500);
         }
-
-
-
-
-
-
     }
 }

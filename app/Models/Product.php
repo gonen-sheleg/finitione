@@ -11,13 +11,7 @@ class Product extends Model
 
     public $timestamps = true;
 
-    protected $fillable = [
-        'category_id',
-        'sku',
-        'name',
-        'description',
-
-    ];
+    protected $fillable = ['category_id', 'sku', 'name', 'description'];
 
     public function vendors()
     {

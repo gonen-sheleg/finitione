@@ -14,7 +14,6 @@ class SubOrder extends Model
         'sub_total_final_price',
         'sub_total_quantity',
         'status',
-
     ];
 
     public function order()
