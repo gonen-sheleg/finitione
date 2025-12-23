@@ -16,7 +16,8 @@ return new class extends Migration {
             $table->decimal('unit_price', 12)->index();
             $table->decimal('unit_final_price', 12)->index();
             $table->json('discounts')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->index(['product_id', 'vendor_id']);
         });

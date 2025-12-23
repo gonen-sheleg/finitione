@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->unsignedInteger('total_quantity')->unsigned()->index();
             $table->json('cart');
             $table->string('status')->default('pending');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Order extends Model
 {
@@ -12,6 +13,13 @@ class Order extends Model
     protected $casts = [
         'cart' => 'array',
     ];
+
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            Cache::forget("loyalty-customer-discount-count-orders-{$order->user_id}");
+        });
+    }
 
     public function subOrders()
     {

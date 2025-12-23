@@ -1,6 +1,6 @@
 # Finitione Order Management System
 
-A multi-vendor e-commerce order processing system built with Laravel 12, featuring intelligent price comparison, extensible discount rules, parallel processing, and automated vendor notifications.
+A multi-vendor e-commerce order processing system built with Laravel 12, featuring intelligent price comparison, extensible discount rules, fast order processing, and automated vendor notifications.
 
 ## Features
 
@@ -9,7 +9,7 @@ A multi-vendor e-commerce order processing system built with Laravel 12, featuri
 - 📦 Quantity-based discounts (5%-15% based on order size)
 - 👤 Loyalty customer discounts (5%-15% based on order history)
 - 🏷️ Category-based discounts (5%-11% for specific categories)
-- ⚡ Parallel processing using Laravel Concurrency for fast order handling
+- ⚡ Fast order processing with optimized performance
 - 📋 Sub-order creation per vendor for easy fulfillment
 - 📧 Automated vendor notifications via queued jobs
 - 🔐 Sanctum-based API authentication
@@ -101,25 +101,14 @@ sail artisan db:seed
 For the best development experience with logs, queue worker, and Vite:
 
 ```bash
-sail composer dev
+sail up -d
+sail artisan queue:work
 ```
-
-This runs concurrently:
-- Laravel development server
-- Queue worker for background jobs
-- Pail for real-time log viewing
-- Vite for frontend assets
 
 ## Running Tests
 
 ```bash
 sail artisan test
-```
-
-Or use the composer script:
-
-```bash
-sail composer test
 ```
 
 ## API Usage Examples
@@ -169,12 +158,16 @@ curl -X POST http://localhost/api/order \
 # [
 #   {
 #     "sku": "PROD-001",
+#     "product": "Example Product 1",
+#     "vendor": "Example Vendor 1",
 #     "quantity": 15,
 #     "price": 100.00,
 #     "price_after_discount": 95.00
 #   },
 #   {
 #     "sku": "PROD-002",
+#     "product": "Example Product 2",
+#     "vendor": "Example Vendor 2",
 #     "quantity": 5,
 #     "price": 120.00,
 #     "price_after_discount": 120.00
@@ -227,11 +220,11 @@ Based on orders in the last 6 months:
 
 1. **User submits cart** with product SKUs and quantities
 2. **Validation** ensures all products exist and quantities are valid
-3. **Price Engine** finds the cheapest vendor for each product (parallel)
+3. **Price Engine** finds the cheapest vendor for each product
 4. **Discount Engine** applies all applicable discount rules
 5. **Order created** with total prices before and after discounts
 6. **Items grouped by vendor** using VendorOrderProcessor
-7. **Sub-orders created** for each vendor (parallel)
+7. **Sub-orders created** for each vendor
 8. **Vendor notifications** dispatched as background jobs
 9. **Response returned** with detailed pricing information
 
@@ -317,7 +310,6 @@ finitione/
 - **Database**: MySQL 8.4
 - **Cache/Queue**: Redis
 - **Authentication**: Laravel Sanctum
-- **Parallel Processing**: Laravel Concurrency (spatie/fork)
 - **Testing**: Pest PHP
 - **Build Tool**: Vite
 - **Container**: Docker (Laravel Sail)

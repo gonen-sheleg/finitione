@@ -161,6 +161,7 @@ class DiscountTest extends TestCase
      */
     public function test_loyalty_discount_application(): void
     {
+
         $discountEngine = new DiscountEngine();
 
         // Get a product vendor to test with
@@ -179,6 +180,7 @@ class DiscountTest extends TestCase
         // Test 5% loyalty discount for > 5 orders (combined with no quantity discount)
         $result = $discountEngine->applyDiscounts($productVendor, 5);
         $loyaltyDiscount = collect($result['details'])->firstWhere('name', '=', 'loyaltycustomer');
+
         $this->assertNotNull($loyaltyDiscount);
         $this->assertEquals(0.05, $loyaltyDiscount['discount']);
         $this->assertEquals(95.00, $result['price']); // 100 * (1 - 0.05)
@@ -370,5 +372,6 @@ class DiscountTest extends TestCase
                 'cart' => [['sku' => 'PROD-001', 'quantity' => 1]],
             ]);
         }
+
     }
 }

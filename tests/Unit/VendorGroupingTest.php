@@ -121,10 +121,10 @@ class VendorGroupingTest extends TestCase
         ]);
 
         // Process the cart
-        $subOrders = OrderProcessor::processCart($cart);
+        $order = OrderProcessor::processCart($cart);
 
         // Should create 2 sub-orders (one per vendor)
-        $this->assertCount(2, $subOrders);
+        $this->assertCount(2, $order->subOrders);
 
         // Verify sub-orders were created in database
         $this->assertDatabaseCount('sub_orders', 2);

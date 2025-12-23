@@ -8,7 +8,6 @@ use App\Models\OrderItem;
 use App\Models\ProductVendor;
 use App\Models\SubOrder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Concurrency;
 
 class VendorOrderProcessor
 {
@@ -32,23 +31,25 @@ class VendorOrderProcessor
         ]);
 
         // Create order items in parallel for faster processing.
-        Concurrency::run(
-            $itemsCollection
-                ->map(
-                    fn($item) => fn() => OrderItem::create([
+        $items =  $itemsCollection
+            ->map(
+                fn ($item)=>
+                    [
                         'sub_order_id' => $subOrder->id,
                         'product_id' => $item['productVendor']['product_id'],
                         'vendor_id' => $item['productVendor']['vendor_id'],
                         'quantity' => $item['quantity'],
                         'unit_price' => $item['productVendor']['price'],
                         'unit_final_price' => $item['discount']['price'],
-                        'discounts' => $item['discount']['details'],
-                    ]),
-                )
-                ->toArray(),
-        );
+                        'discounts' =>  json_encode($item['discount']['details'],JSON_PRETTY_PRINT),
+                    ]
+            )
+            ->toArray();
 
-        logInfo("Suborder created: {$subOrder->id}", 'orange', $subOrder->toArray());
+        OrderItem::insert($items);
+
+        logInfo("Suborder created: {$subOrder->id}", 'orange');
+
 
         // Notify the vendor about the sub-order.
         NotifyVendorJob::dispatch($subOrder);

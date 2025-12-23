@@ -48,11 +48,14 @@ class DiscountEngine
                 $discountName = Str::lower(Str::before(class_basename($rule), 'DiscountRule'));
                 logInfo("Discount name: $discountName", 'green');
                 if ($rule->isApplicable($productVendor, $quantity)) {
+
+                    $value = $rule->apply($productVendor, $quantity);
+
                     $discountDetails[] = [
                         'name' => $discountName,
-                        'discount' => $rule->apply($productVendor, $quantity),
+                        'discount' => $value,
                     ];
-                    $value = $rule->apply($productVendor, $quantity);
+
                     $discount += $value;
                     logInfo("Discount value: $value", 'green');
                 } else {

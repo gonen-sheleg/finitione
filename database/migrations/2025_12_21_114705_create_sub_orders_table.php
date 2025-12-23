@@ -15,7 +15,8 @@ return new class extends Migration {
             $table->decimal('sub_total_final_price', 12)->unsigned()->index();
             $table->unsignedInteger('sub_total_quantity')->index();
             $table->string('status')->default('pending');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

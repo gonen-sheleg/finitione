@@ -8,7 +8,6 @@ use App\Facades\PriceEngine;
 use App\Models\Order;
 use App\Models\SubOrder;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -58,15 +57,17 @@ class OrderController extends Controller
             $cart = collect($validated['cart']);
 
             // Process the cart and create an order.
-            $subOrders = OrderProcessor::processCart($cart);
+            $Order = OrderProcessor::processCart($cart);
 
             // Build the response by going through all sub-orders.
             // For each item, return the product SKU, ordered quantity,
             // original price, and the final price after any discounts applied.
-            $response = collect($subOrders)->flatMap(
+            $response = $Order->subOrders->flatMap(
                 fn($suborder) => $suborder->items()->with('product')->get()->map(
                     fn($item) => [
                         'sku' => $item->product->sku,
+                        'product' => $item->product->name,
+                        'vendor' => $item->vendor->name,
                         'quantity' => $item->quantity,
                         'price' => $item->unit_price,
                         'price_after_discount' => $item->unit_final_price,
