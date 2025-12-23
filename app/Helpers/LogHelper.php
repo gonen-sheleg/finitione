@@ -19,6 +19,7 @@ if (!function_exists('logInfo')) {
 
         $reset = "\033[0m";
         $colorCode = $colors[$color] ?? $colors['white'];
-        Log::withoutContext()->info($colorCode . $text . $reset, $context);
+        $contextJson = !empty($context) ? "\n" . json_encode($context, JSON_PRETTY_PRINT) : '';
+        Log::withoutContext()->info($colorCode . $text . $contextJson . $reset);
     }
 }

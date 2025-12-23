@@ -29,6 +29,9 @@ class NotifyVendorJob implements ShouldQueue
         $user = $order->user;
 
         $address = $user->address ?? [];
+
+        // Format the user address for display in the message.
+        // Example: "Main St, 42, Floor 3, Apt 12, New York, NY, 10001, USA"
         $addressFormatted = collect([
             $address['street'] ?? null,
             $address['building_number'] ?? null,
@@ -40,33 +43,8 @@ class NotifyVendorJob implements ShouldQueue
             $address['country'] ?? null,
         ])->filter()->join(', ');
 
-        $itemsData = $subOrder->items->map(function($item) {
-            $discountDetails = collect($item->discounts)->map(fn($d) => "{$d['name']}: " . ($d['discount'] * 100) . "%")->join(' | ');
-            return [
-                'name' => substr($item->product->name, 0, 30),
-                'sku' => substr($item->product->sku, 0, 20),
-                'quantity' => $item->quantity,
-                'unit_price' => $item->unit_price,
-                'unit_final_price' => $item->unit_final_price,
-                'discount_details' => $discountDetails,
-            ];
-        });
-
-        $discountColWidth = max(16, $itemsData->max(fn($item) => strlen($item['discount_details'])));
-        $itemsHeader = sprintf("| Product                        | SKU                  | Qty | Unit Price | After Discounted | %-{$discountColWidth}s |", "Discount Details");
-        $itemsSeparator = "+--------------------------------+----------------------+-----+------------+------------------+" . str_repeat('-', $discountColWidth + 2) . "+";
-        $itemsRows = $itemsData->map(function($item) use ($discountColWidth) {
-            return sprintf(
-                "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-{$discountColWidth}s |",
-                $item['name'],
-                $item['sku'],
-                $item['quantity'],
-                $item['unit_price'],
-                $item['unit_final_price'],
-                $item['discount_details']
-            );
-        })->join("\n");
-        $itemsDetails = "\n{$itemsSeparator}\n{$itemsHeader}\n{$itemsSeparator}\n{$itemsRows}\n{$itemsSeparator}";
+        // Build the items table for the notification message.
+        $itemsDetails = $this->buildItemsTable($subOrder);
 
         $message = <<<EOT
             ========================================
@@ -107,7 +85,59 @@ class NotifyVendorJob implements ShouldQueue
         EOT;
 
 
+        // Log (send) the notification message.
         logInfo("Vendor notification sending to {$vendor->email}", "purple");
         logInfo("\n\n{$message}", "yellow");
+    }
+
+    /**
+     * Build a formatted table of items for the notification message.
+     *
+     * Creates a text-based table showing each item's product name, SKU,
+     * quantity, unit price, discounted price, and applied discounts.
+     *
+     * Example output:
+     * +------------+-----------+-----+------------+------------------+------------------+
+     * | Product    | SKU       | Qty | Unit Price | After Discounted | Discount Details |
+     * +------------+-----------+-----+------------+------------------+------------------+
+     * | iPhone 15  | IPH-15    |   2 |    $999.00 |          $899.10 | Holiday: 10%     |
+     * +------------+-----------+-----+------------+------------------+------------------+
+     */
+    private function buildItemsTable(SubOrder $subOrder): string
+    {
+        // Format the items data for display in the table.
+        $itemsData = $subOrder->items->map(function($item) {
+            // Format the discount details for display.
+            $discountDetails = collect($item->discounts)->map(fn($d) => "{$d['name']}: " . ($d['discount'] * 100) . "%")->join(' | ');
+            return [
+                'name' => substr($item->product->name, 0, 30),
+                'sku' => substr($item->product->sku, 0, 20),
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'unit_final_price' => $item->unit_final_price,
+                'discount_details' => $discountDetails,
+            ];
+        });
+
+        // Calculate the maximum width for the discount details column.
+        // This ensures the table column is wide enough to fit the longest discount text.
+        $discountColWidth = max(16, $itemsData->max(fn($item) => strlen($item['discount_details'])));
+        $itemsHeader = sprintf("| Product                        | SKU                  | Qty | Unit Price | After Discounted | %-{$discountColWidth}s |", "Discount Details");
+        $itemsSeparator = "+--------------------------------+----------------------+-----+------------+------------------+" . str_repeat('-', $discountColWidth + 2) . "+";
+
+        // Format each item as a row in the table.
+        $itemsRows = $itemsData->map(function($item) use ($discountColWidth) {
+            return sprintf(
+                "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-{$discountColWidth}s |",
+                $item['name'],
+                $item['sku'],
+                $item['quantity'],
+                $item['unit_price'],
+                $item['unit_final_price'],
+                $item['discount_details']
+            );
+        })->join("\n");
+
+        return "\n{$itemsSeparator}\n{$itemsHeader}\n{$itemsSeparator}\n{$itemsRows}\n{$itemsSeparator}";
     }
 }

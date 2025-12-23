@@ -13,7 +13,7 @@ class AddRequestContext
     public function handle(Request $request, Closure $next): Response
     {
 
-        Log::withContext([
+        $context = [
             'url' => $request->fullUrl(),
             'user_id' => $request->user()->id ?? null,
             'user_email' => $request->user()->email ?? null,
@@ -22,7 +22,14 @@ class AddRequestContext
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'payload' => $request->all(),
-        ]);
+        ];
+
+        logInfo("Request context: ",'cyan',$context );
+
+        Log::withContext($context);
+
+
+
 
         return $next($request);
     }

@@ -13,9 +13,18 @@ use Illuminate\Support\Facades\Concurrency;
 class VendorOrderProcessor
 {
 
+    /**
+     * Process the order items for a specific vendor.
+     *
+     * This function handles the vendor-specific part of the order:
+     * 1. Creates a sub-order with the total price, discounted price, and quantity.
+     * 2. Creates individual order items for each product in parallel.
+     * 3. Dispatches a job to notify the vendor about their new order.
+     */
     public function process(Order $order, int $vendorId, Collection $itemsCollection): SubOrder
     {
 
+        // Create a sub-order for the vendor.
         $subOrder = SubOrder::create([
             'order_id' => $order->id,
             'vendor_id' => $vendorId,
@@ -24,6 +33,7 @@ class VendorOrderProcessor
             'sub_total_quantity' => $itemsCollection->sum('quantity'),
         ]);
 
+        // Create order items in parallel for faster processing.
         Concurrency::run(
             $itemsCollection->map(fn($item) =>
                 fn() => OrderItem::create([
@@ -38,6 +48,9 @@ class VendorOrderProcessor
             )->toArray()
         );
 
+        logInfo("Suborder created: {$subOrder->id}", 'orange', $subOrder->toArray());
+
+        // Notify the vendor about the sub-order.
         NotifyVendorJob::dispatch($subOrder);
 
         return $subOrder;

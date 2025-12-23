@@ -14,9 +14,25 @@ use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
+
+    /**
+     * Create a new order from the customer's cart.
+     *
+     * This function handles the complete order creation process:
+     * 1. Validates the cart to ensure it has items with valid products and quantities.
+     * 2. For each product, finds the vendor offering the best price.
+     * 3. Applies any available discounts to reduce the final price.
+     * 4. Groups the items by vendor and creates separate sub-orders for each.
+     * 5. Notifies each vendor about their sub-order.
+     * 6. Returns the order details including original and discounted prices.
+     */
     public function create(Request $request)
     {
 
+        // Validate the incoming cart request.
+        // The cart must have at least one item.
+        // Each item must have a valid product SKU that exists in the database.
+        // Each item must have a quantity of at least 1.
         $validator = Validator::make($request->all(), [
             'cart' => 'required|array|min:1',
             'cart.*.sku' => 'required|string|exists:products,sku',
@@ -40,6 +56,9 @@ class OrderController extends Controller
 
             $subOrders = OrderProcessor::processCart($cart);
 
+            // Build the response by going through all sub-orders.
+            // For each item, return the product SKU, ordered quantity,
+            // original price, and the final price after any discounts applied.
             $response = collect($subOrders)->flatMap(fn($suborder) =>
                 $suborder->items()->with('product')->get()->map(fn($item) => [
                     'sku' => $item->product->sku,
