@@ -96,7 +96,7 @@ sail artisan db:seed
 ```
 
 
-### Step 6: Run Development Server
+### Step 5: Run Development Server
 
 For the best development experience with logs, queue worker, and Vite:
 
