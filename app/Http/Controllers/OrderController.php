@@ -51,7 +51,6 @@ class OrderController extends Controller
 
             return response()->json($response);
         }catch (\Exception $e){
-            dd($e);
             Log::error($e);
             return response()->json(['error' => 'Something went wrong'], 500);
         }

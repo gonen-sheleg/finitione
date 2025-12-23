@@ -14,6 +14,11 @@ class OrderItem extends Model
         'quantity',
         'unit_price',
         'unit_final_price',
+        'discounts'
+    ];
+
+    protected $casts = [
+        'discounts' => 'array',
     ];
 
     public function subOrder()

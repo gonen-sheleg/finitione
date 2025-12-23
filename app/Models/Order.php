@@ -9,6 +9,7 @@ class Order extends Model
 {
 
     protected $fillable = [
+        'user_id',
         'total_price',
         'total_final_price',
         'total_quantity',
@@ -23,5 +24,10 @@ class Order extends Model
     public function subOrders()
     {
         return $this->hasMany(SubOrder::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

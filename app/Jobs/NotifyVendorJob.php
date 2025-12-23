@@ -23,58 +23,79 @@ class NotifyVendorJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $subOrder = $this->subOrder->load(['vendor', 'order', 'items.product']);
+        $subOrder = $this->subOrder->load(['vendor', 'order.user', 'items.product']);
         $vendor = $subOrder->vendor;
         $order = $subOrder->order;
+        $user = $order->user;
 
-        $itemsDetails = '';
-        foreach ($subOrder->items as $item) {
-            $itemsDetails .= sprintf(
-                "  - %s (SKU: %s)\n    Quantity: %d | Unit Price: $%.2f | Total: $%.2f\n",
-                $item->product->name,
-                $item->product->sku,
+        $address = $user->address ?? [];
+        $addressFormatted = collect([
+            $address['street'] ?? null,
+            $address['building_number'] ?? null,
+            isset($address['floor']) ? "Floor {$address['floor']}" : null,
+            isset($address['apartment']) ? "Apt {$address['apartment']}" : null,
+            $address['city'] ?? null,
+            $address['state'] ?? null,
+            $address['postal_code'] ?? null,
+            $address['country'] ?? null,
+        ])->filter()->join(', ');
+
+        $itemsHeader = "| Product                        | SKU                  | Qty | Unit Price | After Discounted | Discount Details                 |";
+        $itemsSeparator = "+--------------------------------+----------------------+-----+------------+------------------+----------------------------------+";
+        $itemsRows = $subOrder->items->map(function($item) {
+            $discountDetails = collect($item->discounts)->map(fn($d) => "{$d['name']}: " . ($d['discount'] * 100) . "%")->join(', ');
+            return sprintf(
+                "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-32s |",
+                substr($item->product->name, 0, 30),
+                substr($item->product->sku, 0, 20),
                 $item->quantity,
                 $item->unit_price,
-                $item->unit_final_price
+                $item->unit_final_price,
+                substr($discountDetails, 0, 32)
             );
-        }
+        })->join("\n");
+        $itemsDetails = "\n{$itemsSeparator}\n{$itemsHeader}\n{$itemsSeparator}\n{$itemsRows}\n{$itemsSeparator}";
 
         $message = <<<EOT
-========================================
-NEW ORDER NOTIFICATION
-========================================
+            ========================================
+            NEW ORDER NOTIFICATION
+            ========================================
 
-Dear {$vendor->name},
+            Dear {$vendor->name},
 
-You have received a new order! Here are the details:
+            You have received a new order! Here are the details:
 
-ORDER INFORMATION
------------------
-Order ID: #{$order->id}
-Sub-Order ID: #{$subOrder->id}
-Order Date: {$order->created_at->format('F j, Y \\a\\t g:i A')}
-Status: {$subOrder->status}
+            ORDER INFORMATION
+            -----------------
+            Order ID: #{$order->id}
+            Sub-Order ID: #{$subOrder->id}
+            Order Date: {$order->created_at->format('F j, Y \\a\\t g:i A')}
+            Status: {$subOrder->status}
 
-ITEMS ORDERED
--------------
-{$itemsDetails}
-ORDER SUMMARY
--------------
-Total Items: {$subOrder->sub_total_quantity}
-Total Price: \${$subOrder->sub_total_price}
-After Discount: \${$subOrder->sub_total_final_price}
+            CUSTOMER INFORMATION
+            --------------------
+            Name: {$user->name}
+            Email: {$user->email}
+            Address: {$addressFormatted}
 
-Please process this order at your earliest convenience.
+            ITEMS ORDERED
+            {$itemsDetails}
 
-Thank you for your partnership!
+            ORDER SUMMARY
+            -------------
+            Total Items: {$subOrder->sub_total_quantity}
+            Total Price: \${$subOrder->sub_total_price}
+            After Discount: \${$subOrder->sub_total_final_price}
 
-========================================
-EOT;
+            Please process this order at your earliest convenience.
 
-        Log::info("Vendor notification sent to {$vendor->email}", [
-            'vendor_id' => $vendor->id,
-            'sub_order_id' => $subOrder->id,
-            'message' => $message,
-        ]);
+            Thank you for your partnership!
+
+            ========================================
+        EOT;
+
+
+        logInfo("Vendor notification sending to {$vendor->email}", "purple");
+        logInfo("\n\n{$message}", "yellow");
     }
 }

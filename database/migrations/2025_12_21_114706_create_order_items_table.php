@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->unsignedInteger('quantity')->index();
             $table->decimal('unit_price', 12)->index();
             $table->decimal('unit_final_price', 12)->index();
+            $table->json('discounts')->nullable();
             $table->timestamps();
 
             $table->index(['product_id', 'vendor_id']);

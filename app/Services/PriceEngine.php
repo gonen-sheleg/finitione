@@ -28,7 +28,7 @@ class PriceEngine
         return [
             'productVendor' => $productVendor,
             'sku' => $sku,
-            'final_price' => DiscountEngine::applyDiscounts($productVendor,$quantity),
+            'discount' => DiscountEngine::applyDiscounts($productVendor,$quantity),
             'quantity' => $quantity,
             'vendor_id' => $productVendor->vendor_id,
         ];

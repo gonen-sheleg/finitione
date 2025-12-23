@@ -10,11 +10,18 @@ class QuantityDiscountRule implements DiscountRuleInterface
 {
     public function apply(ProductVendor $productVendor, int $quantity): float
     {
-        return 0.3;
+        return match (true) {
+            $quantity >= 50 => 0.15,
+            $quantity >= 40 => 0.11,
+            $quantity >= 30 => 0.09,
+            $quantity >= 20 => 0.07,
+            $quantity >= 10 => 0.05,
+            default => 0.0,
+        };
     }
 
     public function isApplicable(ProductVendor $productVendor, int $quantity): bool
     {
-        return true;
+        return $quantity > 10;
     }
 }

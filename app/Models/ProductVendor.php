@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class ProductVendor extends Model
 {
 
+    use HasFactory;
+
+    public $timestamps = true;
+
     protected $fillable = [
         'product_id',
         'vendor_id',

@@ -13,7 +13,8 @@ return new class extends Migration {
             $table->foreignId('vendor_id')->constrained()->cascadeOnDelete();
             $table->decimal('price', 12, 2);
             $table->integer('quantity');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->unique(['product_id', 'vendor_id']);
         });

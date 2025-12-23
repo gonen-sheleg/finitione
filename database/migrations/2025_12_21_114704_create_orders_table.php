@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->decimal('total_price', 12, 2)->unsigned()->index();
             $table->decimal('total_final_price', 12, 2)->unsigned()->index()->nullable();
             $table->unsignedInteger('total_quantity')->unsigned()->index();

@@ -9,10 +9,12 @@ return new class extends Migration {
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
+            $table->tinyInteger('category_id')->unsigned()->index();
             $table->string('sku', 50)->unique()->index();
             $table->string('name')->index();
             $table->text('description');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 
