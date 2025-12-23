@@ -105,6 +105,11 @@ sail up -d
 sail artisan queue:work
 ```
 
+To monitor the full log of the process, open a new terminal window and run:
+```bash
+tail storage/logs/laravel.log -f -n 0
+```
+
 ## Running Tests
 
 ```bash
