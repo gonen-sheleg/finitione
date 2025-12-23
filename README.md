@@ -52,8 +52,7 @@ docker run --rm -v $(pwd):/app composer install --ignore-platform-reqs
 ./vendor/bin/sail artisan key:generate
 ./vendor/bin/sail artisan migrate
 ./vendor/bin/sail artisan db:seed
-./vendor/bin/sail npm install
-./vendor/bin/sail npm run build
+./vendor/bin/sail artisan queue:work
 ```
 
 ## Detailed Installation Guide
