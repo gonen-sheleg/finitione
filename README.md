@@ -311,7 +311,6 @@ finitione/
 - **Cache/Queue**: Redis
 - **Authentication**: Laravel Sanctum
 - **Testing**: Pest PHP
-- **Build Tool**: Vite
 - **Container**: Docker (Laravel Sail)
 
 ## License
