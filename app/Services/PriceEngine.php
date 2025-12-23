@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\InsufficientStockException;
 use App\Facades\DiscountEngine;
 use App\Models\Product;
 use App\Models\ProductVendor;
@@ -18,10 +19,9 @@ class PriceEngine
             ->orderBy('price', 'asc')
             ->first();
 
+        // If there is no available stock, throw an exception.
         if (empty($productVendor)) {
-            throw new \Exception(
-                "Insufficient stock for product {$sku}. Please reduce the quantity or check back later.",
-            );
+            throw new InsufficientStockException($sku, $quantity);
         }
 
         $productVendor->decrement('quantity', $quantity);

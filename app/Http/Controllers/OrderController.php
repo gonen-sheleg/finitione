@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\InsufficientStockException;
 use App\Facades\OrderProcessor;
 use App\Facades\PriceEngine;
 use App\Models\Order;
@@ -56,6 +57,7 @@ class OrderController extends Controller
         try {
             $cart = collect($validated['cart']);
 
+            // Process the cart and create an order.
             $subOrders = OrderProcessor::processCart($cart);
 
             // Build the response by going through all sub-orders.
@@ -73,6 +75,8 @@ class OrderController extends Controller
             );
 
             return response()->json($response);
+        } catch (InsufficientStockException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             Log::error($e);
             return response()->json(['error' => 'Something went wrong'], 500);
