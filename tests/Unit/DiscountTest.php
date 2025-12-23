@@ -13,7 +13,6 @@ use Tests\TestCase;
 
 class DiscountTest extends TestCase
 {
-    use RefreshDatabase;
 
     protected function setUp(): void
     {
