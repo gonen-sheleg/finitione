@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Jobs\NotifyVendorJob;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\ProductVendor;
 use App\Models\SubOrder;
 use Illuminate\Support\Collection;
 

@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Exceptions\InsufficientStockException;
 use App\Facades\DiscountEngine;
 use App\Models\Product;
-use App\Models\ProductVendor;
 
 class PriceEngine
 {

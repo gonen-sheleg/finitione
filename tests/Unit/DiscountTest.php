@@ -8,7 +8,6 @@ use App\Models\ProductVendor;
 use App\Models\User;
 use App\Models\Vendor;
 use App\Services\Discount\DiscountEngine;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class DiscountTest extends TestCase

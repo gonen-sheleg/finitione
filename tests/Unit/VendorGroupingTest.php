@@ -8,7 +8,6 @@ use App\Models\ProductVendor;
 use App\Models\SubOrder;
 use App\Models\User;
 use App\Models\Vendor;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class VendorGroupingTest extends TestCase

@@ -2,10 +2,7 @@
 
 namespace App\Services\Discount\Rules;
 
-use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\ProductVendor;
-use App\Models\User;
 use App\Services\Discount\DiscountRuleInterface;
 use Illuminate\Support\Facades\Cache;
 

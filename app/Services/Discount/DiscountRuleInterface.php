@@ -2,7 +2,6 @@
 
 namespace App\Services\Discount;
 
-use App\Models\OrderItem;
 use App\Models\ProductVendor;
 
 interface DiscountRuleInterface

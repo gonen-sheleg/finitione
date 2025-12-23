@@ -5,8 +5,6 @@ namespace App\Services;
 use App\Facades\PriceEngine;
 use App\Facades\VendorOrderProcessor;
 use App\Models\Order;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
