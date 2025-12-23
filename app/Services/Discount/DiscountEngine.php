@@ -10,20 +10,13 @@ use ReflectionClass;
 
 class DiscountEngine
 {
-    private array $rules = [];
-
-    public function addRule(DiscountRuleInterface $rule): self
-    {
-        $this->rules[] = $rule;
-        return $this;
-    }
 
     public function getRules(): array
     {
 
         $rulesPath = app_path('Services/Discount/Rules');
         $namespace = 'App\\Services\\Discount\\Rules\\';
-
+        $rules = [];
         foreach (File::files($rulesPath) as $file) {
             try{
                 $className = $namespace . $file->getFilenameWithoutExtension();
@@ -32,7 +25,7 @@ class DiscountEngine
                     $reflection = new ReflectionClass($className);
 
                     if (!$reflection->isAbstract() && $reflection->implementsInterface(DiscountRuleInterface::class)) {
-                        $this->rules[] = new $className();
+                        $rules[] = new $className();
                     }
                 }
             }catch (\Exception $e){
@@ -41,7 +34,7 @@ class DiscountEngine
 
         }
 
-        return $this->rules;
+        return $rules;
     }
 
     public function applyDiscounts(ProductVendor $productVendor, int $quantity): array
@@ -50,6 +43,7 @@ class DiscountEngine
         $rules = $this->getRules();
         $discount = 0;
         $discountDetails = [];
+
         foreach ($rules as $rule){
             try{
                 $discountName = Str::lower(Str::before(class_basename($rule), 'DiscountRule'));

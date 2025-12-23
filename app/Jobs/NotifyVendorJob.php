@@ -40,18 +40,30 @@ class NotifyVendorJob implements ShouldQueue
             $address['country'] ?? null,
         ])->filter()->join(', ');
 
-        $itemsHeader = "| Product                        | SKU                  | Qty | Unit Price | After Discounted | Discount Details                 |";
-        $itemsSeparator = "+--------------------------------+----------------------+-----+------------+------------------+----------------------------------+";
-        $itemsRows = $subOrder->items->map(function($item) {
-            $discountDetails = collect($item->discounts)->map(fn($d) => "{$d['name']}: " . ($d['discount'] * 100) . "%")->join(', ');
+        $itemsData = $subOrder->items->map(function($item) {
+            $discountDetails = collect($item->discounts)->map(fn($d) => "{$d['name']}: " . ($d['discount'] * 100) . "%")->join(' | ');
+            return [
+                'name' => substr($item->product->name, 0, 30),
+                'sku' => substr($item->product->sku, 0, 20),
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+                'unit_final_price' => $item->unit_final_price,
+                'discount_details' => $discountDetails,
+            ];
+        });
+
+        $discountColWidth = max(16, $itemsData->max(fn($item) => strlen($item['discount_details'])));
+        $itemsHeader = sprintf("| Product                        | SKU                  | Qty | Unit Price | After Discounted | %-{$discountColWidth}s |", "Discount Details");
+        $itemsSeparator = "+--------------------------------+----------------------+-----+------------+------------------+" . str_repeat('-', $discountColWidth + 2) . "+";
+        $itemsRows = $itemsData->map(function($item) use ($discountColWidth) {
             return sprintf(
-                "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-32s |",
-                substr($item->product->name, 0, 30),
-                substr($item->product->sku, 0, 20),
-                $item->quantity,
-                $item->unit_price,
-                $item->unit_final_price,
-                substr($discountDetails, 0, 32)
+                "| %-30s | %-20s | %3d | $%9.2f | $%15.2f | %-{$discountColWidth}s |",
+                $item['name'],
+                $item['sku'],
+                $item['quantity'],
+                $item['unit_price'],
+                $item['unit_final_price'],
+                $item['discount_details']
             );
         })->join("\n");
         $itemsDetails = "\n{$itemsSeparator}\n{$itemsHeader}\n{$itemsSeparator}\n{$itemsRows}\n{$itemsSeparator}";
